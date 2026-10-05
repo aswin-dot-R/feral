@@ -4,8 +4,6 @@ from torch import nn
 from feral.backbones import BackboneAdapter
 from feral import rocm_compat
 
-rocm_compat.apply()
-
 
 class AttentionPoolingBlockCustom(nn.Module):
     def __init__(self, embed_dim, num_heads, out_tokens, **kwargs):
@@ -49,6 +47,7 @@ class FeralModel(nn.Module):
         predict_per_item), batch-norm, dropout, and a linear classification head. Freezes the first
         freeze_encoder_layers backbone layers."""
         super().__init__()
+        rocm_compat.apply()  # no-op unless torch < 2.13 on a ROCm wave32 GPU (pytorch#199265)
         self.backbone = BackboneAdapter(backbone, pretrained=pretrained, gradient_checkpointing=gradient_checkpointing)
         d = self.backbone.hidden_dim
 
